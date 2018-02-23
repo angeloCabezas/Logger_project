@@ -43,7 +43,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataAccess\LogDataAccess.cs" />
+    <Compile Include="FileManager\LogFileManager.cs" />
     <Compile Include="JobLogger.cs" />
+    <Compile Include="Enum\Message.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

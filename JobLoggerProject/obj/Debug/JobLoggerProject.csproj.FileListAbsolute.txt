@@ -12,3 +12,10 @@ D:\PROYECTO\Project_JobLoggerBelatrix\JobLoggerProject\JobLoggerProject\obj\Debu
 D:\PROYECTO\Project_JobLoggerBelatrix\JobLoggerProject\JobLoggerProject\obj\Debug\JobLoggerProject.csproj.CoreCompileInputs.cache
 D:\PROYECTO\Project_JobLoggerBelatrix\JobLoggerProject\JobLoggerProject\obj\Debug\JobLoggerProject.exe
 D:\PROYECTO\Project_JobLoggerBelatrix\JobLoggerProject\JobLoggerProject\obj\Debug\JobLoggerProject.pdb
+D:\Pro\Belatrix\Project-JobLogger\JobLoggerProject\obj\Debug\JobLoggerProject.csprojResolveAssemblyReference.cache
+D:\Pro\Belatrix\Project-JobLogger\JobLoggerProject\obj\Debug\JobLoggerProject.csproj.CoreCompileInputs.cache
+D:\Pro\Belatrix\Project-JobLogger\JobLoggerProject\obj\Debug\JobLoggerProject.exe
+D:\Pro\Belatrix\Project-JobLogger\JobLoggerProject\obj\Debug\JobLoggerProject.pdb
+D:\Pro\Belatrix\Project-JobLogger\JobLoggerProject\bin\Debug\JobLoggerProject.exe.config
+D:\Pro\Belatrix\Project-JobLogger\JobLoggerProject\bin\Debug\JobLoggerProject.exe
+D:\Pro\Belatrix\Project-JobLogger\JobLoggerProject\bin\Debug\JobLoggerProject.pdb

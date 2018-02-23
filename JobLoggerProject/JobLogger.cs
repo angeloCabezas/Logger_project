@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Configuration;
+using System.IO;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,71 +11,88 @@ namespace JobLoggerProject
 {
     public class JobLogger
     {
-        private static bool _logToFile;
-        private static bool _logToConsole;
-        private static bool _logMessage;
-        private static bool _logWarning;
-        private static bool _logError;
-        private static bool _logToDatabase;
+        private static bool _logToFile = false;
+        private static bool _logToConsole = false;
+        private static bool _logMessage = false;
+        private static bool _logWarning = false;
+        private static bool _logError = false;
+        private static bool _logToDatabase = false;
 
-        #region Enum Logger
-        public enum TypeMessage
+        #region Init Configuration
+        public static void SetTypeLogAllow(bool logToTextFile, bool logToConsole, bool logToDatabase)
         {
-            Message = 1,
-            Warning = 2,
-            Error = 3
+
+            _logToFile = logToTextFile;
+            _logToConsole = logToConsole;
+            _logToDatabase = logToDatabase;
+        }
+
+        public static void SetMessageAllow(bool allowError, bool allowMessage, bool allowWarning)
+        {
+            _logError = allowError;
+            _logMessage = allowMessage;
+            _logWarning = allowWarning;
+        }
+
+        public static bool getConfigurationApp()
+        {
+            try
+            {
+                string logToTextFile = ConfigurationManager.AppSettings["LogToTextFile"];
+                string logToConsole = ConfigurationManager.AppSettings["LogToConsole"];
+                string logToDatabase = ConfigurationManager.AppSettings["LogToDatabase"];
+                string allowError = ConfigurationManager.AppSettings["AllowError"];
+                string allowMessage = ConfigurationManager.AppSettings["AllowMessage"];
+                string allowWarning = ConfigurationManager.AppSettings["AllowWarning"];
+
+                if (logToTextFile == null || logToConsole == null || logToDatabase == null)
+                {
+                    throw new Exception("App.config is not configured correctly, Check LogToTextFile | LogToConsole | LogToDatabase");
+                }
+
+                if (allowError == null || allowMessage == null || allowWarning == null)
+                {
+                    throw new Exception("App.config is not configured correctly, Check AllowError | AllowMessage | AllowWarning");
+                }
+
+                SetTypeLogAllow(logToTextFile == "1" ? true : false, logToConsole == "1" ? true : false, logToDatabase == "1" ? true : false);
+                SetMessageAllow(allowError == "1" ? true : false, allowMessage == "1" ? true : false, allowWarning == "1" ? true : false);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
         #endregion
-        
-        public JobLogger(bool logToFile, bool logToConsole, bool logToDatabase,bool logMessage, bool logWarning, bool logError)
-        {
-            _logError   = logError;
-            _logMessage = logMessage;
-            _logWarning = logWarning;
-            _logToDatabase = logToDatabase; 
-            _logToFile  = logToFile;
-            _logToConsole  = logToConsole;
-        }
 
-        
-        public static void LogMessage(string message, TypeMessage typeMessage)
+        #region Validation
+        public static string ValidateMessage(string message)
         {
             if (String.IsNullOrEmpty(message))
             {
                 throw new Exception("Invalid message");
             }
-            message.Trim();
 
-            if (!_logToConsole && !_logToFile && !_logToDatabase)
+            return message.Trim();
+        }
+
+        public static bool ValidateSetTypeLogAllow()
+        {
+            if ((!_logToConsole && !_logToFile && !_logToDatabase))
             {
-                throw new Exception("Invalid configuration");
+                throw new Exception("Error, You must be specified type of Log");
             }
+            return true;
+        }
 
+        public static bool ValidateSetMessageAllow()
+        {
             if ((!_logError && !_logMessage && !_logWarning))
             {
                 throw new Exception("Error or Warning or Message must be specified");
             }
-
-            //Se ha abstraido los metodos de Validar el tipo de mensaje permitido,
-            //grabar en base de datos, grabar en Archivo de Texto y mostrar en Consola
-            //para efectuar las pruebas unitarias de los metodos por separado.
-            if (ValidateTypeAllow(typeMessage))
-            {
-                if (_logToDatabase)
-                {
-                    SaveMessageInBD(message, typeMessage);
-                }
-
-                if (_logToFile)
-                {
-                    SaveMessageInTextFile(message, typeMessage);
-                }
-
-                if (_logToConsole)
-                {
-                    SaveMessageInConsole(message, typeMessage);
-                }
-            }
+            return true;
         }
 
         public static bool ValidateTypeAllow(TypeMessage typeMessage)
@@ -82,81 +102,94 @@ namespace JobLoggerProject
             if (_logWarning && TypeMessage.Warning == typeMessage) return true;
             return false;
         }
+        #endregion
 
+        #region Main Methods
+        public static void LogMessage(string message, TypeMessage typeMessage)
+        {
+            try
+            {
+                message = ValidateMessage(message);
+
+                ValidateSetTypeLogAllow();
+
+                ValidateSetMessageAllow();
+
+                if (ValidateTypeAllow(typeMessage))
+                {
+                    if (_logToDatabase)
+                    {
+                        SaveMessageInBD(message, typeMessage);
+                    }
+
+                    if (_logToFile)
+                    {
+                        SaveMessageInTextFile(message, typeMessage);
+                    }
+
+                    if (_logToConsole)
+                    {
+                        SaveMessageInConsole(message, typeMessage);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        #endregion
+
+        #region SaveMessageInLogs
         public static int SaveMessageInBD(string message, TypeMessage typeMessage)
         {
             try
             {
-                int resultado = 0;
-                string conectionString = System.Configuration.ConfigurationManager.AppSettings["ConnectionString"];
-
-                if (string.IsNullOrEmpty(conectionString)) { return 0; }
-
-                using (System.Data.SqlClient.SqlConnection connection = new System.Data.SqlClient.SqlConnection(conectionString))
-                {
-                    connection.Open();
-                    System.Data.SqlClient.SqlCommand command = new System.Data.SqlClient.SqlCommand();
-                    command.Connection = connection;
-                    command.CommandType = System.Data.CommandType.StoredProcedure;
-                    command.CommandText = "usp_InsertTBL_LOG";
-                    command.Parameters.Add("@messageLog", System.Data.SqlDbType.VarChar).Value = message;
-                    command.Parameters.Add("@IdTipoMensaje", System.Data.SqlDbType.Int).Value = ((int)typeMessage);
-                    resultado = command.ExecuteNonQuery();
-                }
-                return resultado;
+                DataAccess.LogDataAccess dataAccess = new DataAccess.LogDataAccess();
+                return dataAccess.InsertTBL_LOG(message, (int)typeMessage);
             }
             catch (Exception ex)
             {
-                //Se deberia escribir un log de errores aquí. Puede fallar por no encontrar información en el config o por permisos para escribir.
-                return 0;
+                throw ex;
             }
         }
 
-        public static int SaveMessageInTextFile(string message,TypeMessage typeMessage)
+        public static bool SaveMessageInTextFile(string message, TypeMessage typeMessage)
         {
             try
             {
-                string textLog = "";
-
-                string filePath = System.Configuration.ConfigurationManager.AppSettings["LogFileDirectory"];
                 string fileName = "LogFile" + DateTime.Today.ToString("ddMMyyyy") + ".txt";
-
-                if (string.IsNullOrEmpty(filePath)) { return 0; }
-
-                if (System.IO.File.Exists(filePath + fileName))
-                {
-                    textLog = System.IO.File.ReadAllText(filePath + fileName);
-                }
-
-                textLog += Environment.NewLine;
-                textLog += typeMessage + " " + DateTime.Now.ToShortDateString() + " : "  +message;
-
-                System.IO.File.WriteAllText(filePath + "LogFile" + DateTime.Today.ToString("ddMMyyyy") + ".txt", textLog);
-
-                return 1;
+                string textLog = GetFormatMessage(message, typeMessage);
+                return FileManager.LogFileManager.WriteMesageToTextFile(fileName, textLog);
             }
             catch (Exception ex)
             {
-                //Se deberia escribir un log de errores aquí. Puede fallar por no encontrar información en el config o por permisos para escribir.
-                return 0;
+                throw ex;
             }
             
         }
 
-        public static int SaveMessageInConsole(string message, TypeMessage typeMessage)
+        public static bool SaveMessageInConsole(string message, TypeMessage typeMessage)
         {
             try
             {
                 Console.ForegroundColor = typeMessage == TypeMessage.Error ? ConsoleColor.Red : typeMessage == TypeMessage.Warning ? ConsoleColor.Yellow : ConsoleColor.White;
-                Console.WriteLine(DateTime.Now.ToShortDateString() + message);
-                return 1;
+                Console.WriteLine(GetFormatMessage(message,typeMessage));
+                return true;
             }
             catch (Exception ex)
             {
-                //Se deberia escribir un log de errores aquí. Puede fallar por no encontrar información en el config o por permisos para escribir.
-                return 0;
+                throw ex;
             }
             
         }
+        #endregion
+
+        #region Formats
+        public static string GetFormatMessage(string message, TypeMessage typeMessage)
+        {
+            return typeMessage + " " + DateTime.Now.ToString() + " : " + message;
+        }
+        #endregion
     }
 }

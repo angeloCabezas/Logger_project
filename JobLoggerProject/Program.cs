@@ -10,13 +10,12 @@ namespace JobLoggerProject
     {
         static void Main(string[] args)
         {
-            JobLogger Job = new JobLogger(false, true, false, true, true, true);
-            
             try
             {
-                JobLogger.LogMessage("Mensaje de Prueba Consola Warning",JobLogger.TypeMessage.Warning);
-                JobLogger.LogMessage("Mensaje de Prueba Consola Message", JobLogger.TypeMessage.Message);
-                JobLogger.LogMessage("Mensaje de Prueba Consola Error", JobLogger.TypeMessage.Error);
+                JobLogger.getConfigurationApp();
+                JobLogger.LogMessage("Este es la prueba 1002 mensaje de prueba", TypeMessage.Message);
+                JobLogger.LogMessage("Este es la prueba 1002 mensaje de prueba", TypeMessage.Warning);
+                JobLogger.LogMessage("Este es la prueba 1002 mensaje de prueba", TypeMessage.Error);
                 Console.ReadLine();
             }
             catch (Exception ex)

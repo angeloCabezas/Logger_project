@@ -7,34 +7,79 @@ namespace JobLoggerTests
     [TestClass]
     public class JobLoggerTest
     {
+
+        [TestInitialize]
+        public void Initialize()
+        {
+            JobLogger.getConfigurationApp();
+        }
+
         [TestMethod]
         [ExpectedException(typeof(Exception), "Invalid message")]
         public void JobLoggerWithInvalidMessage()
         {
-            JobLogger jobLogger = new JobLogger(true, true, true, true, true, true);
-
-            JobLogger.LogMessage("", JobLogger.TypeMessage.Message);
+            JobLogger.ValidateMessage("");
             //Assert => Exception
         }
 
         [TestMethod]
-        [ExpectedException(typeof(Exception), "Invalid configuration")]
-        public void JobLoggerWithInvalidConfiguration()
+        public void JobLoggerWithValidMessage()
         {
-            JobLogger jobLogger = new JobLogger(false, false, false, true, true, true);
+            string expectedValue = "Prueba de mensaje";
 
-            JobLogger.LogMessage("", JobLogger.TypeMessage.Message);
+            string result = JobLogger.ValidateMessage(" Prueba de mensaje ");
+            
+            Assert.AreEqual(expectedValue, result);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(Exception), "Error, You must be specified type of Log")]
+        public void JobLoggerWithInvalid_ValidateSetTypeLogAllow()
+        {
+            JobLogger.SetTypeLogAllow(false, false, false);
+
+            JobLogger.ValidateSetTypeLogAllow();
             //Assert => Exception
+        }
+
+        [TestMethod]
+        public void JobLoggerWithValid_ValidateSetTypeLogAllow()
+        {
+            bool exceptedValue = true;
+
+            bool result = JobLogger.ValidateSetTypeLogAllow();
+            
+            Assert.AreEqual(exceptedValue, result);
         }
 
         [TestMethod]
         [ExpectedException(typeof(Exception), "Error or Warning or Message must be specified")]
-        public void JobLoggerWithInvalidConfigurationMessage()
+        public void JobLoggerWithInvalid_ValidateSetMessageAllow()
         {
-            JobLogger jobLogger = new JobLogger(true, true, true, false, false, false);
+            JobLogger.SetMessageAllow(false, false, false);
 
-            JobLogger.LogMessage("", JobLogger.TypeMessage.Message);
+            JobLogger.ValidateSetMessageAllow();
             //Assert => Exception
+        }
+
+        [TestMethod]
+        public void JobLoggerWithValid_ValidateSetMessageAllow()
+        {
+            bool exceptedValue = true;
+
+            bool result = JobLogger.ValidateSetMessageAllow();
+            //Assert => Exception
+            Assert.AreEqual(exceptedValue, result);
+        }
+
+        [TestMethod]
+        public void JobLogger_ValidateTypeAllowTrue()
+        {
+            bool expectedValue = true;
+
+            bool result = JobLogger.ValidateTypeAllow(TypeMessage.Warning);
+
+            Assert.AreEqual(expectedValue, result);
         }
 
         [TestMethod]
@@ -42,7 +87,7 @@ namespace JobLoggerTests
         {
             int expectedValue = 1;
 
-            int result = JobLogger.SaveMessageInBD("Guardar en Base de datos", JobLogger.TypeMessage.Warning);
+            int result = JobLogger.SaveMessageInBD("Guardar en Base de datos", TypeMessage.Warning);
 
             Assert.AreEqual(expectedValue, result);
         }
@@ -50,9 +95,9 @@ namespace JobLoggerTests
         [TestMethod]
         public void JobLogger_SaveMessageInTextFile()
         {
-            int expectedValue = 1;
+            bool expectedValue = true;
 
-            int result = JobLogger.SaveMessageInTextFile("Guardar en Text File", JobLogger.TypeMessage.Error);
+            bool result = JobLogger.SaveMessageInTextFile("Guardar en Text File", TypeMessage.Error);
 
             Assert.AreEqual(expectedValue, result);
         }
@@ -60,33 +105,13 @@ namespace JobLoggerTests
         [TestMethod]
         public void JobLogger_SaveMessageInConsole()
         {
-            int expectedValue = 1;
-
-            int result = JobLogger.SaveMessageInConsole("Mostrar en consola", JobLogger.TypeMessage.Warning);
-
-            Assert.AreEqual(expectedValue, result);
-        }
-
-        [TestMethod]
-        public void JobLogger_ValidateTypeAllowTrue()
-        {//Se habilita el uso de warning
             bool expectedValue = true;
-            JobLogger jobLogger = new JobLogger(true, true, true, false, true, false); 
 
-            bool result = JobLogger.ValidateTypeAllow(JobLogger.TypeMessage.Warning);
-
-            Assert.AreEqual(expectedValue, result);
-        }
-
-        [TestMethod]
-        public void JobLogger_ValidateTypeAllowFalse()
-        {//Se deshabilita el uso de warning
-            bool expectedValue = false;
-            JobLogger jobLogger = new JobLogger(true, true, true, true, false, true); 
-
-            bool result = JobLogger.ValidateTypeAllow(JobLogger.TypeMessage.Warning);
+            bool result = JobLogger.SaveMessageInConsole("Mostrar en consola", TypeMessage.Warning);
 
             Assert.AreEqual(expectedValue, result);
         }
+
+
     }
 }

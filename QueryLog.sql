@@ -13,13 +13,14 @@ GO
 
 CREATE TABLE TBL_LOG (
 	IdLoger int identity(1,1) primary Key,
-	messageLog varchar(max),
-	IdTipoMensaje int
+	MessageLog varchar(max),
+	IdTipoMensaje int,
+	FechaLog datetime default getdate()
 )
 GO
 
 CREATE PROCEDURE usp_InsertTBL_LOG
 @messageLog varchar(max), @IdTipoMensaje int
 AS 
-INSERT INTO TBL_LOG (messageLog,IdTipoMensaje) values (@messageLog,@IdTipoMensaje)
+INSERT INTO TBL_LOG (MessageLog,IdTipoMensaje) values (@messageLog,@IdTipoMensaje)
 GO

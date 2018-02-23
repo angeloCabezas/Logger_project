@@ -49,6 +49,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="JobLoggerTest.cs" />
+    <Compile Include="LogDataAccessTests.cs" />
+    <Compile Include="LogFileManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
